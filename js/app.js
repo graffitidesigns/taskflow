@@ -36,46 +36,57 @@ const tasks = [
     }
 ];
 
-/*tasks.forEach(function(task) {
-    console.log(task);
-});
-
-console.log(tasks[0]);*/
-
-/*const todoTaskList = document.querySelector('[data-status="todo"] .task-list');
-const taskCard = document.createElement("details");
-const taskSummary = document.createElement("summary");
-
-taskCard.classList.add("task-card");
-todoTaskList.append(taskCard);
-
-taskSummary.textContent = tasks[0].title;
-taskCard.append(taskSummary);
-
-console.log(taskCard);*/
+const months = [
+    "Jan", "Feb", "Mar", "Apr",
+    "May", "Jun", "Jul", "Aug",
+    "Sep", "Oct", "Nov", "Dec"
+    ];
 
 function renderTask(task){
     const taskList = document.querySelector(`[data-status="${task.status}"] .task-list`);
     const taskCard = document.createElement("details");
     const taskSummary = document.createElement("summary");
+    const taskDescription = document.createElement("p");
+    const priorityContainer = document.createElement("div");
+    const priorityLabel = document.createElement("p");
+    const priorityType = document.createElement("p");
+    const dateContainer = document.createElement("div");
+    const dateLabel = document.createElement("p");
+    const date = document.createElement("p");
+    const dateParts = task.expectedDate.split("-");
+    const year = dateParts[0];
+    const month = months[dateParts[1] - 1];
+    const day = dateParts[2];
+
     taskCard.classList.add("task-card");
+    taskDescription.classList.add("description");
+    priorityContainer.classList.add("priority");
+    priorityType.classList.add("priority-type");
+    dateContainer.classList.add("expected-date");
+    date.classList.add("date");
 
     taskSummary.textContent = task.title;
+    taskDescription.textContent = task.description;
+    priorityLabel.textContent = "Priority:";
+    priorityType.textContent = task.priority[0].toUpperCase() + task.priority.slice(1);
+    dateLabel.textContent = "Expected:";
+    date.textContent = `${month} ${day}, ${year}`;
+
+    priorityContainer.append(priorityLabel);
+    priorityContainer.append(priorityType);
+    dateContainer.append(dateLabel);
+    dateContainer.append(date);
     taskCard.append(taskSummary);
+    taskCard.append(taskDescription);
+    taskCard.append(priorityContainer);
+    taskCard.append(dateContainer);
     taskList.append(taskCard);
-    console.log(taskCard);
+
 }
 
 tasks.forEach(function(task) {
     renderTask(task);
 });
-
-/*const todoTasks = tasks.filter(function(task) {
-    return task.status === "todo";
-    
-});
-console.log(todoTasks);
-console.log(todoTasks.length);*/
 
 function countTasks(status){
     const filteredTasks = tasks.filter(function(task){
@@ -84,8 +95,6 @@ function countTasks(status){
     return filteredTasks.length;
 }
 
-console.log(countTasks("completed"));
-
 function updateTaskCount(status) {
     const countedTasks = document.querySelector(
         `[data-status="${status}"] .task-count`
@@ -93,4 +102,11 @@ function updateTaskCount(status) {
     countedTasks.textContent = countTasks(status);
 
 }
-updateTaskCount("in-progress");
+
+
+const taskColumns = document.querySelectorAll(".task-column");
+
+taskColumns.forEach(function(column) {
+    
+    updateTaskCount(column.dataset.status);
+});
