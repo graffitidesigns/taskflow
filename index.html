@@ -87,6 +87,40 @@
                         <div class="task-list"></div>
                     </div>
                 </section>
+
+                <dialog class="task-dialog">
+                    <form class="task-form">
+                        <fieldset>
+                            <legend>New Task</legend>
+                            <label for="task-title">Title</label>
+                            <input type="text" id="task-title" name="title" required>
+
+                            <label for="task-description">Description</label>
+                            <textarea id="task-description" name="description"></textarea>
+
+                            <label for="task-status">Status</label>
+                            <select id="task-status" name="status" required>
+                                <option value="todo">To Do</option>
+                                <option value="in-progress">In Progress</option>
+                                <option value="review">Review</option>
+                                <option value="completed">Completed</option>
+                            </select>
+
+                            <label for="task-priority">Priority</label>
+                            <select id="task-priority" name="priority" required>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+
+                            <label for="expected-date">Expected Date</label>
+                            <input type="date" id="expected-date" name="expectedDate">
+
+                            <button type="submit" class="new-task-btn">Create Task</button>
+                            <button type="button" class="cancel-btn">Cancel</button>
+                        </fieldset>
+                    </form>
+                </dialog>
             </main>
         </div>
 
