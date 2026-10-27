@@ -46,7 +46,10 @@ const newTaskButton = document.querySelector(".new-proj-btn");
 const taskDialog = document.querySelector(".task-dialog");
 const cancelButton = document.querySelector(".cancel-btn");
 const taskForm = document.querySelector(".task-form");
+const taskLegend = document.querySelector(".task-form legend");
+const taskSubmitButton = document.querySelector(".new-task-btn");
 const taskColumns = document.querySelectorAll(".task-column");
+let editingTaskId = null;
 
 function renderTask(task){
     const taskList = document.querySelector(`[data-status="${task.status}"] .task-list`);
@@ -59,19 +62,58 @@ function renderTask(task){
     const dateContainer = document.createElement("div");
     const dateLabel = document.createElement("p");
     const date = document.createElement("p");
+    const editButton = document.createElement("button");
+    const deleteButton = document.createElement("button");
 
     taskCard.classList.add("task-card");
+    taskCard.dataset.taskId = task.id;
     taskDescription.classList.add("description");
     priorityContainer.classList.add("priority");
     priorityType.classList.add("priority-type");
     dateContainer.classList.add("expected-date");
     date.classList.add("date");
 
+    editButton.type = "button";
+    editButton.classList.add("edit-task-btn");
+    deleteButton.type = "button";
+    deleteButton.classList.add("delete-task-btn");
+    deleteButton.textContent = "Delete";
+
+    editButton.addEventListener("click", function(){
+
+        const taskToEdit = tasks.find(function(currentTask){
+            return currentTask.id === task.id;
+        })
+        document.querySelector("#task-title").value = taskToEdit.title;
+        document.querySelector("#task-description").value = taskToEdit.description;
+        document.querySelector("#task-status").value = taskToEdit.status;
+        document.querySelector("#task-priority").value = taskToEdit.priority;
+        document.querySelector("#expected-date").value = taskToEdit.expectedDate;
+        editingTaskId = task.id;
+        taskSubmitButton.textContent = "Save Changes";
+        taskLegend.textContent = "Edit Task";
+        taskDialog.showModal();
+    });
+
+    deleteButton.addEventListener("click", function(){
+        const confirmed = confirm("Are you sure you want to delete this task?");
+        if(confirmed){
+            const taskIndex = tasks.findIndex(function(currentTask){
+                return currentTask.id === task.id;
+            });
+
+            tasks.splice(taskIndex, 1);
+            renderTasks();
+        }
+    });
+
+
     taskSummary.textContent = task.title;
     taskDescription.textContent = task.description;
     priorityLabel.textContent = "Priority:";
     priorityType.textContent = task.priority[0].toUpperCase() + task.priority.slice(1);
     dateLabel.textContent = "Expected:";
+    editButton.textContent = "Edit";
 
     if(task.expectedDate){
         const dateParts = task.expectedDate.split("-");
@@ -92,8 +134,9 @@ function renderTask(task){
     taskCard.append(taskDescription);
     taskCard.append(priorityContainer);
     taskCard.append(dateContainer);
+    taskCard.append(editButton);
+    taskCard.append(deleteButton);
     taskList.append(taskCard);
-
 }
 
 function countTasks(status){
@@ -111,22 +154,17 @@ function updateTaskCount(status) {
 
 }
 
-tasks.forEach(function(task) {
-    renderTask(task);
-});
-
-taskColumns.forEach(function(column) {
-    
-    updateTaskCount(column.dataset.status);
-});
-
 newTaskButton.addEventListener("click", function(){
+    editingTaskId = null;
+    taskLegend.textContent = "New Task";
+    taskSubmitButton.textContent = "Create Task";
     taskDialog.showModal();
 });
 
 
 cancelButton.addEventListener("click", function(){
     taskForm.reset();
+    editingTaskId = null;
     taskDialog.close();
 });
 
@@ -140,30 +178,65 @@ taskForm.addEventListener("submit", function(event){
     const priority = document.querySelector("#task-priority").value;
     const expectedDate = document.querySelector("#expected-date").value;
 
-    const id = tasks.length + 1;
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, "0");
-    const day = String(today.getDate()).padStart(2, "0");
+    if (editingTaskId === null) {
+        const taskIds = tasks.map(function(task){
+            return task.id;
+        });
+        const highestId = Math.max(0,...taskIds);
+        const id = highestId + 1;
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, "0");
+        const day = String(today.getDate()).padStart(2, "0");
 
-    const createdDate = `${year}-${month}-${day}`;
+        const createdDate = `${year}-${month}-${day}`;
 
-    const newTask = {
-        id,
-        title,
-        description,
-        status,
-        priority,
-        expectedDate,
-        createdDate,
-        archived: false,
-        actualCompletedDate: null
-    };
+        const newTask = {
+            id,
+            title,
+            description,
+            status,
+            priority,
+            expectedDate,
+            createdDate,
+            archived: false,
+            actualCompletedDate: null
+        };
 
-    tasks.push(newTask);
-    renderTask(newTask);
-    updateTaskCount(status);
+        tasks.push(newTask);
+        renderTasks();
+    } else {
+        const taskToEdit = tasks.find(function(task){
+            return task.id === editingTaskId;
+        });
+
+        taskToEdit.title = title;
+        taskToEdit.description = description;
+        taskToEdit.status = status;
+        taskToEdit.priority = priority;
+        taskToEdit.expectedDate = expectedDate;
+
+        renderTasks();
+    }
 
     taskForm.reset();
     taskDialog.close();
+    editingTaskId = null;
 });
+
+function renderTasks(){
+    const taskLists = document.querySelectorAll(".task-list");
+    taskLists.forEach(function(taskList){
+        taskList.textContent = "";
+    });
+
+    tasks.forEach(function(task) {
+    renderTask(task);
+    });
+
+    taskColumns.forEach(function(column) {
+    updateTaskCount(column.dataset.status);
+    });
+}
+
+renderTasks();
