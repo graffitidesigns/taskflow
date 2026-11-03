@@ -65,11 +65,15 @@ function renderTask(task){
     const editButton = document.createElement("button");
     const deleteButton = document.createElement("button");
 
+    let displayDate;
+    let displayLabel;
+
     taskCard.classList.add("task-card");
     taskCard.dataset.taskId = task.id;
     taskDescription.classList.add("description");
     priorityContainer.classList.add("priority");
     priorityType.classList.add("priority-type");
+    priorityType.classList.add(task.priority);
     dateContainer.classList.add("expected-date");
     date.classList.add("date");
 
@@ -84,6 +88,7 @@ function renderTask(task){
         const taskToEdit = tasks.find(function(currentTask){
             return currentTask.id === task.id;
         })
+        console.log(taskToEdit.actualCompletedDate);
         document.querySelector("#task-title").value = taskToEdit.title;
         document.querySelector("#task-description").value = taskToEdit.description;
         document.querySelector("#task-status").value = taskToEdit.status;
@@ -112,11 +117,20 @@ function renderTask(task){
     taskDescription.textContent = task.description;
     priorityLabel.textContent = "Priority:";
     priorityType.textContent = task.priority[0].toUpperCase() + task.priority.slice(1);
-    dateLabel.textContent = "Expected:";
+    
+    if(task.status === "completed"){
+        displayDate = task.actualCompletedDate;
+        displayLabel = "Completed:";
+    }else{
+        displayDate = task.expectedDate;
+        displayLabel = "Expected:";
+    }
+    
+    dateLabel.textContent = displayLabel;
     editButton.textContent = "Edit";
 
-    if(task.expectedDate){
-        const dateParts = task.expectedDate.split("-");
+    if(displayDate){
+        const dateParts = displayDate.split("-");
         const year = dateParts[0];
         const month = months[dateParts[1] - 1];
         const day = dateParts[2];
@@ -200,7 +214,7 @@ taskForm.addEventListener("submit", function(event){
             expectedDate,
             createdDate,
             archived: false,
-            actualCompletedDate: null
+            actualCompletedDate: status === "completed" ? createdDate : null 
         };
 
         tasks.push(newTask);
@@ -212,7 +226,21 @@ taskForm.addEventListener("submit", function(event){
 
         taskToEdit.title = title;
         taskToEdit.description = description;
+
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, "0");
+        const day = String(today.getDate()).padStart(2, "0");
+
+        const completedDate = `${year}-${month}-${day}`;
         taskToEdit.status = status;
+        if(status==="completed"){
+            if(taskToEdit.actualCompletedDate === null){
+                taskToEdit.actualCompletedDate = completedDate;
+        }}else{
+            taskToEdit.actualCompletedDate =null;
+        }
+
         taskToEdit.priority = priority;
         taskToEdit.expectedDate = expectedDate;
 

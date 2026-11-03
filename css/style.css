@@ -162,8 +162,32 @@ header .container{
 
 .priority{
     display: inline-flex;
+    align-items: center;
     padding: 0.5rem;
     gap: 0.5rem;
+}
+
+.priority-type {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.priority-type.high {
+    background-color: #FEE2E2;
+    color: #991B1B;
+}
+
+.priority-type.medium {
+    background-color: #FEF3C7;
+    color: #92400E;
+}
+
+.priority-type.low {
+    background-color: #DCFCE7;
+    color: #166534;
 }
 
 .expected-date{
