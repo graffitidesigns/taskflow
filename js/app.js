@@ -1,4 +1,4 @@
-const tasks = [
+let tasks = [
     {
         id: 1, 
         title: "Finish dashboard layout",
@@ -42,6 +42,12 @@ const months = [
     "Sep", "Oct", "Nov", "Dec"
     ];
 
+const priorityOrder = {
+    high: 3,
+    medium: 2,
+    low: 1
+};
+
 const newTaskButton = document.querySelector(".new-proj-btn");
 const taskDialog = document.querySelector(".task-dialog");
 const cancelButton = document.querySelector(".cancel-btn");
@@ -50,6 +56,10 @@ const taskLegend = document.querySelector(".task-form legend");
 const taskSubmitButton = document.querySelector(".new-task-btn");
 const taskColumns = document.querySelectorAll(".task-column");
 let editingTaskId = null;
+const taskSearch = document.querySelector("#task-search");
+const priorityFilter = document.querySelector("#priority-filter");
+const statusFilter = document.querySelector("#status-filter");
+const sortTasks = document.querySelector("#sort-tasks");
 
 function renderTask(task){
     const taskList = document.querySelector(`[data-status="${task.status}"] .task-list`);
@@ -108,6 +118,7 @@ function renderTask(task){
             });
 
             tasks.splice(taskIndex, 1);
+            saveTasks();
             renderTasks();
         }
     });
@@ -153,25 +164,42 @@ function renderTask(task){
     taskList.append(taskCard);
 }
 
-function countTasks(status){
-    const filteredTasks = tasks.filter(function(task){
+function countTasks(status, taskArray){
+    const filteredTasks = taskArray.filter(function(task){
         return task.status === status;
     });
     return filteredTasks.length;
 }
 
-function updateTaskCount(status) {
+function updateTaskCount(status, taskArray) {
     const countedTasks = document.querySelector(
         `[data-status="${status}"] .task-count`
     );
-    countedTasks.textContent = countTasks(status);
+    countedTasks.textContent = countTasks(status, taskArray);
 
 }
+
+taskSearch.addEventListener("input", function(){
+    renderTasks();
+});
+
+priorityFilter.addEventListener("change", function(){
+    renderTasks();
+});
+
+statusFilter.addEventListener("change", function(){
+    renderTasks();
+});
+
+sortTasks.addEventListener("change", function(){
+    renderTasks();
+})
 
 newTaskButton.addEventListener("click", function(){
     editingTaskId = null;
     taskLegend.textContent = "New Task";
     taskSubmitButton.textContent = "Create Task";
+    taskForm.reset();
     taskDialog.showModal();
 });
 
@@ -218,6 +246,7 @@ taskForm.addEventListener("submit", function(event){
         };
 
         tasks.push(newTask);
+        saveTasks();
         renderTasks();
     } else {
         const taskToEdit = tasks.find(function(task){
@@ -244,6 +273,7 @@ taskForm.addEventListener("submit", function(event){
         taskToEdit.priority = priority;
         taskToEdit.expectedDate = expectedDate;
 
+        saveTasks();
         renderTasks();
     }
 
@@ -257,14 +287,95 @@ function renderTasks(){
     taskLists.forEach(function(taskList){
         taskList.textContent = "";
     });
+    const searchQuery = taskSearch.value.toLowerCase().trim();
+    const selectedPriority = priorityFilter.value;
+    const selectedStatus = statusFilter.value;
+    const filteredTasks = tasks.filter(function(task){
+        const matchesSearch = 
+            task.title.toLowerCase().includes(searchQuery) || 
+            task.description.toLowerCase().includes(searchQuery);
 
-    tasks.forEach(function(task) {
-    renderTask(task);
+        const matchesPriority = 
+            selectedPriority === "all" || task.priority === selectedPriority;
+
+        const matchesStatus = 
+            selectedStatus === "all" || task.status === selectedStatus;
+
+        return matchesSearch && matchesPriority && matchesStatus;
+    });
+
+
+        const selectedSort = sortTasks.value;
+    if(selectedSort === "title-asc"){
+
+        filteredTasks.sort(function(a, b){
+            return a.title.localeCompare(b.title);
+        })
+
+    }else if(selectedSort === "title-desc"){
+
+        filteredTasks.sort(function(a, b){
+            return b.title.localeCompare(a.title);
+        })
+
+    }else if(selectedSort === "priority-desc"){
+        filteredTasks.sort(function(a, b){
+            return priorityOrder[b.priority] - priorityOrder[a.priority];
+        })
+
+    }else if(selectedSort === "priority-asc"){
+        filteredTasks.sort(function(a, b){
+            return priorityOrder[a.priority] - priorityOrder[b.priority];
+        })
+    }else if(selectedSort === "date-asc"){
+        filteredTasks.sort(function(a, b){
+            if(!a.expectedDate && !b.expectedDate){
+                return 0;
+            }else if(!a.expectedDate){
+                return 1;
+            }else if(!b.expectedDate){
+                return -1;
+            }
+
+            return a.expectedDate.localeCompare(b.expectedDate);
+        })
+    }else if(selectedSort === "date-desc"){
+        filteredTasks.sort(function(a, b){
+            if(!a.expectedDate && !b.expectedDate){
+                return 0;
+            }else if(!a.expectedDate){
+                return 1;
+            }else if(!b.expectedDate){
+                return -1;
+            }
+
+            return b.expectedDate.localeCompare(a.expectedDate);
+        })
+    };
+
+
+
+    filteredTasks.forEach(function(task) {
+        renderTask(task);
     });
 
     taskColumns.forEach(function(column) {
-    updateTaskCount(column.dataset.status);
+    updateTaskCount(column.dataset.status,filteredTasks);
     });
 }
 
+function saveTasks(){
+    localStorage.setItem("taskflow-tasks", JSON.stringify(tasks));
+}
+
+function loadTasks(){
+    const savedTasks = localStorage.getItem("taskflow-tasks");
+    if(savedTasks){
+        tasks=JSON.parse(savedTasks);
+    }
+
+}
+
+
+loadTasks();
 renderTasks();

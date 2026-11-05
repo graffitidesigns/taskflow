@@ -51,11 +51,32 @@
                 </section>
 
                 <div class="dash-ctrl">
-                    <button type="button" class="ctrl-btn search">Search</button>
+                    <input type="search" id="task-search" aria-label="Search tasks" placeholder="Search tasks...">
 
-                    <button type="button" class="ctrl-btn filter">Filter</button>
+                    <select id="priority-filter" aria-label = "Filter By Priority">
+                        <option value="all">All Priorities</option>
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
 
-                    <button type="button" class="ctrl-btn sort">Sort</button>
+                    <select id="status-filter" aria-label = "Filter By Status">
+                        <option value="all">All Statuses</option>
+                        <option value="todo">To Do</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="review">Review</option>
+                        <option value="completed">Completed</option>
+                    </select>
+
+                    <select id="sort-tasks" aria-label="Sort tasks">
+                        <option value="default">Default Order</option>
+                        <option value="title-asc">Title (A-Z)</option>
+                        <option value="title-desc">Title (Z-A)</option>
+                        <option value="priority-desc">Priority (High-Low)</option>
+                        <option value="priority-asc">Priority (Low-High)</option>
+                        <option value="date-asc">Expected Date (Earliest)</option>
+                        <option value="date-desc">Expected Date (Latest)</option>
+                    </select>
                 </div>
 
                 <h2>Recently Active Project</h2>
