@@ -282,6 +282,37 @@ taskForm.addEventListener("submit", function(event){
     editingTaskId = null;
 });
 
+function updateDashboardStats(){
+    const totalTasksLabel = document.querySelector(".stat-card.total p");
+    totalTasksLabel.textContent = tasks.length;
+
+    const todoLabel = document.querySelector(".stat-card.todo p");
+    const todoCount = countTasks("todo", tasks);
+    todoLabel.textContent = todoCount;
+
+    const inProgressLabel = document.querySelector(".stat-card.in-progress p");
+    const inProgressCount = countTasks("in-progress", tasks);
+    inProgressLabel.textContent = inProgressCount;
+
+    const reviewLabel = document.querySelector(".stat-card.review p");
+    const reviewCount = countTasks("review", tasks);
+    reviewLabel.textContent = reviewCount;
+
+    const completedLabel = document.querySelector(".stat-card.completed p");
+    const completedCount = countTasks("completed", tasks);
+    completedLabel.textContent = completedCount;
+
+    const completionRateLabel = document.querySelector(".stat-card.completion-rate p");
+
+    if(tasks.length > 0){
+        const completionRate = (completedCount / tasks.length) * 100;
+        completionRateLabel.textContent = `${Math.round(completionRate)}%`;
+    }else{
+        completionRateLabel.textContent = "0%";
+    }
+
+}
+
 function renderTasks(){
     const taskLists = document.querySelectorAll(".task-list");
     taskLists.forEach(function(taskList){
@@ -362,6 +393,8 @@ function renderTasks(){
     taskColumns.forEach(function(column) {
     updateTaskCount(column.dataset.status,filteredTasks);
     });
+
+    updateDashboardStats();
 }
 
 function saveTasks(){

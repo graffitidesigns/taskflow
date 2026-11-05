@@ -74,8 +74,8 @@ header .container{
 
 .ttl-stats{
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1rem;
     padding: 2rem;
     width: 100%;
     align-items: stretch;
